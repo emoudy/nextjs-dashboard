@@ -1,0 +1,8 @@
+/* CSS Modules provide a way to make CSS classes locally scoped to components by default, reducing the risk of styling conflicts. */
+.shape {
+  height: 0;
+  width: 0;
+  border-bottom: 30px solid black;
+  border-left: 20px solid transparent;
+  border-right: 20px solid transparent;
+}

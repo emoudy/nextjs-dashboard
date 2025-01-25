@@ -1,15 +1,28 @@
 'use client';
 
-import { CustomerField, InvoiceForm } from '@/app/lib/definitions';
+import { useActionState } from 'react';
+import Link from 'next/link';
 import {
   CheckIcon,
   ClockIcon,
   CurrencyDollarIcon,
   UserCircleIcon,
 } from '@heroicons/react/24/outline';
-import { updateInvoice } from '@/app/lib/actions';
-import Link from 'next/link';
+import { CustomerField, InvoiceForm } from '@/app/lib/definitions';
+import { updateInvoice, State } from '@/app/lib/actions';
 import { Button } from '@/app/ui/button';
+
+/* Labels Used  
+  aria-describedby="customer-error": This establishes a relationship between the select element and the error message container. 
+    It indicates that the container with id="customer-error" describes the select element. 
+    Screen readers will read this description when the user interacts with the select box to notify them of errors.
+  id="customer-error": This id attribute uniquely identifies the HTML element that holds the error message for the select input. 
+    This is necessary for aria-describedby to establish the relationship.
+  aria-live="polite": The screen reader should politely notify the user when the error inside the div is updated. 
+    When the content changes (e.g. when a user corrects an error), the screen reader will announce these changes, 
+    but only when the user is idle so as not to interrupt them.
+  run pnpm lint to check if you're using the aria labels correctly.
+*/ 
 
 export default function EditInvoiceForm({
   invoice,
@@ -18,12 +31,16 @@ export default function EditInvoiceForm({
   invoice: InvoiceForm;
   customers: CustomerField[];
 }) {
-  /* We need to pass the id to the Server Action to update the right record in the database. We use JS bind to ensure the values are encoded. 
-  Note: Using a hidden input field (e.g. <input type="hidden" name="id" value={invoice.id} />) would also work but the values will appear as full text in the HTML source, which is not ideal for sensitive data.*/
+
+  /* We need to pass the id to the Server Action to update the right record in the database. 
+  We use JS bind to ensure the values are encoded.  Note: Using a hidden input field (e.g. <input type="hidden" name="id" value={invoice.id} />) 
+  would also work but the values will appear as full text in the HTML source, which is not ideal for sensitive data.*/
   const updateInvoiceWithId = updateInvoice.bind(null, invoice.id);
+  const initialState: State = { message: null, errors: {} };
+  const [state, formAction] = useActionState(updateInvoiceWithId, initialState);
   
   return (
-    <form action={updateInvoiceWithId}>
+    <form action={formAction}>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
         {/* Customer Name */}
         <div className="mb-4">
@@ -68,6 +85,13 @@ export default function EditInvoiceForm({
               />
               <CurrencyDollarIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
             </div>
+          </div>
+          <div id="customer-error" aria-live="polite" aria-atomic="true">
+            {state.errors?.amount && state.errors.amount.map((error: string) => (
+              <p className="mt-2 text-sm text-red-500" key={error}>
+                {error}
+              </p>
+            ))}
           </div>
         </div>
 

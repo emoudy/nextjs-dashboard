@@ -1,4 +1,8 @@
 import SideNav from '@/app/ui/dashboard/sidenav';
+
+/* experimental_ppr combines the benefits of static and dynamic rendering in the same route. 
+Next.js will prerender the static parts of your route and defer the dynamic parts until the user requests them. */
+export const experimental_ppr = true;
  
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (

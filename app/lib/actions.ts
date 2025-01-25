@@ -2,6 +2,17 @@
 
 import { z } from 'zod';
 import { sql } from '@vercel/postgres';
+import { redirect } from 'next/navigation';
+/* Next.js has a client-side router cache that stores the route segments in the user's browser for a time. 
+Along with prefetching, this cache ensures that users can quickly navigate between routes while reducing the 
+number of requests made to the server.
+
+The revalidatePath function clears this cache and trigger a new request to the server.  
+We need this because we're updating the data displayed in the invoices route 
+
+Once the database has been updated, the /dashboard/invoices path will be revalidated, 
+and fresh data will be fetched from the server.*/
+import { revalidatePath } from 'next/cache';
  
 const FormSchema = z.object({
   id: z.string(),
@@ -26,4 +37,7 @@ export async function createInvoice(formData: FormData) {
     INSERT INTO invoices (customer_id, amount, status, date)
     VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
   `;
+
+  revalidatePath('/dashboard/invoices');
+  redirect('/dashboard/invoices');
 }
